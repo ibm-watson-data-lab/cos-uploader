@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style type="text/css">
+    body {
+      font-family: "Helvetica Neue",Helvetica,Arial,sans-serif
+    }
+    #drop_zone {
+      width:50%;
+      height:200px;
+      padding:20px;
+      border: 2px dashed red
+    }
+    .ondrag {
+      border: 2px solid red !important
+    }
+    #status {
+      width:50%;
+      background-color:black;
+      color: #00ff00;
+      min-height:200px;
+      font-size:22px;
+      padding:20px;
+      border: 2px solid black
+    }
+  </style>
+</head>
+<body>
+    <div id="drop_zone" ondrop="drop_handler(event);" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)">
+      <strong>Drop Zone ...</strong>
+    </div>
+    <div id="status"></div>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script>
+      // given a content-type, get a presigned URL to allow a file of that type to be uploaded
+      var getPresignedURL = function(content_type, callback) {
+        $.ajax({
+          type: 'POST',
+          url: 'YOUR_SERVERLESS_URL',
+          data: JSON.stringify({content_type: content_type}),
+          contentType: 'application/json; charset=utf-8',
+          dataType: 'json',
+          error: function(e) {
+            console.log('ajax error', e);
+            callback(true, null);
+          },
+          success: function(d) {
+            console.log('ajax success', d)
+            callback(null, d)
+          }
+        });
+      }
+
+      // make an HTTP PUT, writing the file's contents to object storage
+      var upload = function(f, content_type, url, callback) {
+        var reader = new FileReader();
+        reader.onload = function(event) {
+          $.ajax({
+            type: 'PUT',
+            url: url,
+            data: reader.result,
+            contentType: content_type,
+            processData: false,
+            error: function(e) {
+              callback(e, null);
+            },
+            success: function(d) {
+              callback(null, d)
+            }
+          });
+        }
+        reader.readAsArrayBuffer(f)
+      }
+
+
+      var onDragOver = function(ev) {
+        ev.preventDefault();
+        $('#drop_zone').addClass('ondrag')
+      }
+
+      var onDragLeave = function(ev) {
+        ev.preventDefault();
+        $('#drop_zone').removeClass('ondrag')
+      }
+
+      // called when a file is dropped in the drop zone
+      var drop_handler = function (ev) {
+        ev.preventDefault();
+        $('#drop_zone').removeClass('ondrag')
+        var f = ev.dataTransfer.files[0];
+        $('#status').html('')
+        $('#status').append('Preparing to upload file<br>')
+        $('#status').append('* filename: ' + f.name + '<br>')
+        $('#status').append('* content-type: ' + f.type + '<br>')
+        $('#status').append('* content-length: ' + f.size + '<br>')
+        $('#status').append('Getting pre-signed upload URL from IBM Cloud Functions<br>')
+        getPresignedURL(f.type, function(err, presigned) {
+          if (err) {
+            return console.log('error - could not get URL')
+          }
+          var url = presigned.url
+          $('#status').append('Uploading to IBM Cloud Object Storage<br>')
+          upload(f, f.type, presigned.url, function(err, data) {
+            if (err) {
+              $('#status').append('Upload error<br>')
+            } else {
+              $('#status').append('Upload Complete<br>')
+            }
+          })
+        });
+      }
+    </script>
+
+</body>
+</html>
