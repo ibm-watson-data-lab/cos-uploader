@@ -63,7 +63,7 @@ Set some environment variables with your object storage credentials and endpoint
 export access_key='xxx'
 export secret_key='yyy'
 export bucket='mybucket'
-export endpoint='https://s3.us-south.objectstorage.softlayer.net'
+export endpoint='https://s3-api.us-geo.objectstorage.softlayer.net'
 ```
 
 and run the deployment script:
@@ -72,11 +72,9 @@ and run the deployment script:
 ./deploy.sh
 ```
 
-The URL of your new API call will be:
+The `deploy.sh` script should output the URL of your serverless action. It will be something like:
 
     https://openwhisk.ng.bluemix.net/api/v1/web/ORG_SPACE/default/upload.json
-
-where `ORG_SPACE` is your IBM Cloud organisation and space separated by an underscore e.g. `glynn.bird%40uk.ibm.com_dev`
 
 You can call the API from curl to test it:
 
