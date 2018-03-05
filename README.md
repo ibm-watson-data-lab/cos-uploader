@@ -91,8 +91,12 @@ and upload a file to the URL *it* returns:
 curl -T ./trump.jpg -H 'Content-type: image/jpg' 'https://s3-api.us-geo.objectstorage.softlayer.net/mybucket/N9n4YnJcyGlbEnwIXD49.jpg?AWSAccessKeyId=xxx&Signature=yyy&Expires=1519910332'
 ```
 
-### Uploading from a web page
+## Uploading from a web page
 
 This repo contains an `upload.html` file. Edit it to replace `YOUR_SERVERLESS_URL` with the URL of your IBM Cloud Functions API call that we created in the latest step. If you open the web page in a browser, any file you drag and drop into the drop zone will be automatically uploaded to your Object Storage bucket!
 
 ![screenshot](img/screenshot.png)
+
+## Links
+
+If you need to download files from Object Storage to your browser then [this repostory](https://github.com/ibm-watson-data-lab/cos-downloader) can help.
